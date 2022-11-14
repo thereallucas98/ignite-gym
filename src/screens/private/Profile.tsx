@@ -46,10 +46,10 @@ export function Profile() {
         const photoInfo = await FileSystem.getInfoAsync(photoSelected.uri);
         if (photoInfo.size && photoInfo.size / 1024 / 1024 > 5) {
           return toast.show({
-            title: 'Essa imagem é muito grande. Escolha uma de até 5MB.',
-            placement: 'top',
-            bgColor: 'red.500'
-          })
+            title: "Essa imagem é muito grande. Escolha uma de até 5MB.",
+            placement: "top",
+            bgColor: "red.500",
+          });
         }
 
         setUserPhoto(photoSelected.uri);
@@ -104,6 +104,7 @@ export function Profile() {
             mb={2}
             alignSelf="flex-start"
             mt={12}
+            fontFamily="heading"
           >
             Alterar senha
           </Heading>
