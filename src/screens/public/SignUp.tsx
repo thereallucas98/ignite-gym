@@ -35,7 +35,7 @@ export function SignUp() {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting, isValid },
   } = useForm<FormDataProps>({
     resolver: yupResolver(signUpSchema),
   });
@@ -141,6 +141,8 @@ export function SignUp() {
 
           <Button
             title="Criar e acessar"
+            isDisabled={!isValid}
+            isLoading={isSubmitting}
             onPress={handleSubmit(handleSignUp)}
           />
         </Center>
@@ -148,7 +150,7 @@ export function SignUp() {
         <Button
           title="Voltar para o login"
           variant="outline"
-          mt={14}
+          mt={12}
           onPress={handleGoBackToLogin}
         />
       </VStack>
