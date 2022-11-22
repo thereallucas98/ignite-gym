@@ -25,7 +25,7 @@ export function ExerciseCard({ ...rest }: Props) {
           }}
           alt="Imagem do exercício"
           rounded="md"
-          resizeMode="center"
+          resizeMode="cover"
         />
 
         <VStack flex={1}>
