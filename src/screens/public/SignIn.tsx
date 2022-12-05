@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   VStack,
   Image,
@@ -37,6 +39,8 @@ const signInSchema = yup.object({
 });
 
 export function SignIn() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const { signIn } = useAuth();
 
   const toast = useToast();
@@ -57,6 +61,7 @@ export function SignIn() {
 
   async function handleSignIn({ email, password }: FormDataProps) {
     try {
+      setIsLoading(true);
       await signIn(email, password);
     } catch (error) {
       const isAppError = error instanceof AppError;
@@ -70,6 +75,8 @@ export function SignIn() {
         placement: "top",
         bgColor: "red.500",
       });
+
+      setIsLoading(false);
     }
   }
 
@@ -132,7 +139,7 @@ export function SignIn() {
           <Button
             title="Acessar"
             isDisabled={!isValid}
-            isLoading={isSubmitting}
+            isLoading={isSubmitting || isLoading}
             onPress={handleSubmit(handleSignIn)}
           />
         </Center>
