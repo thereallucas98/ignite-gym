@@ -8,6 +8,12 @@ import {
   storageRemoveUser,
 } from "@storage/storageUser";
 
+import {
+  storageSaveAuthToken,
+  storageGetAuthToken,
+  storageRemoveAuthToken,
+} from "@storage/storageAuthToken";
+
 export type AuthContextDataProps = {
   user: UserDTO;
   signIn: (email: string, password: string) => Promise<void>;
@@ -28,16 +34,40 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [isLoadingUserStorageData, setIsLoadingUserStorageData] =
     useState(true);
 
+  async function updateUserAndToken(userData: UserDTO, token: string) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+    setUser(userData);
+  }
+
+  async function storageUserAndToken(userData: UserDTO, token: string) {
+    try {
+      setIsLoadingUserStorageData(true);
+
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      await storageSaveUser(userData);
+      await storageSaveAuthToken(token);
+      setUser(userData);
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoadingUserStorageData(false);
+    }
+  }
+
   async function signIn(email: string, password: string) {
     try {
       const { data } = await api.post("/sessions", { email, password });
 
-      if (data.user) {
-        setUser(data.user);
-        storageSaveUser(data.user);
+      if (data.user && data.token) {
+        await storageUserAndToken(data.user, data.token);
+        updateUserAndToken(data.user, data.token);
       }
     } catch (error) {
       throw error;
+    } finally {
+      setIsLoadingUserStorageData(false);
     }
   }
 
@@ -46,6 +76,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       setIsLoadingUserStorageData(true);
       setUser({} as UserDTO);
       await storageRemoveUser();
+      await storageRemoveAuthToken();
     } catch (error) {
       throw error;
     } finally {
@@ -55,10 +86,13 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
   async function loadUserData() {
     try {
-      const userLogged = await storageGetUser();
+      setIsLoadingUserStorageData(true);
 
-      if (userLogged) {
-        setUser(userLogged);
+      const userLogged = await storageGetUser();
+      const token = await storageGetAuthToken();
+
+      if (token) {
+        updateUserAndToken(userLogged, token);
       }
     } catch (error) {
       throw error;
