@@ -19,6 +19,7 @@ import SeriesSvg from "@assets/series.svg";
 import RepetitionsSvg from "@assets/repetitions.svg";
 
 import { Button } from "@components/Button";
+import { Loading } from '@components/Loading';
 
 import { ExerciseDTO } from "@dtos/ExerciseDTO";
 
@@ -33,6 +34,7 @@ type RouteParamsProps = {
 };
 
 export function Exercise() {
+  const [isLoading, setIsLoading] = useState(true);
   const [exercise, setExercise] = useState<ExerciseDTO>({} as ExerciseDTO);
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
@@ -48,6 +50,7 @@ export function Exercise() {
 
   async function fetchExerciseDetails() {
     try {
+      setIsLoading(true);
       const response = await api.get(`/exercises/${exerciseId}`);
 
       setExercise(response.data);
@@ -62,6 +65,8 @@ export function Exercise() {
         placement: "top",
         bgColor: "red.500",
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -100,7 +105,7 @@ export function Exercise() {
         </HStack>
       </VStack>
 
-      <ScrollView p={8} contentContainerStyle={{ paddingBottom: 56 }}>
+      { isLoading ? <Loading /> : <ScrollView p={8} contentContainerStyle={{ paddingBottom: 56 }}>
         <Box rounded="lg" mb={3} overflow="hidden">
           <Image
             w="full"
@@ -138,7 +143,7 @@ export function Exercise() {
 
           <Button title="Marcar como realizado" />
         </Box>
-      </ScrollView>
+      </ScrollView>}
     </VStack>
   );
 }

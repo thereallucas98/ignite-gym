@@ -18,7 +18,7 @@ import { AppError } from "@utils/AppError";
 export function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
-  const [groupSelected, setGroupSelected] = useState("bíceps");
+  const [groupSelected, setGroupSelected] = useState("antebraço");
   const [groups, setGroups] = useState<string[]>([]);
 
   const [exercises, setExercises] = useState<ExerciseDTO[]>([]);
