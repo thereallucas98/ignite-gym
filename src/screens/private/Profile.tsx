@@ -63,7 +63,7 @@ export function Profile() {
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
   const [userPhoto, setUserPhoto] = useState(githubUrl);
 
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const toast = useToast();
 
   const {
@@ -114,7 +114,12 @@ export function Profile() {
   async function handleProfileUpdate(data: FormDataProps) {
     try {
       setIsUpdating(true);
+      const updatedUser = user;
+      updatedUser.name = data.name;
+
       await api.put("/users", data);
+
+      await updateUserProfile(updatedUser);
 
       toast.show({
         title: "Perfil atualizado com sucesso!",
