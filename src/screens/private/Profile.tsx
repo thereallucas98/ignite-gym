@@ -28,7 +28,7 @@ import { api } from "@services/api";
 
 import { AppError } from "@utils/AppError";
 
-const githubUrl = "https://github.com/thereallucas98.png";
+import defaulUserPhotoImg from "@assets/userPhotoDefault.png";
 
 const PHOTO_SIZE = 33;
 
@@ -61,7 +61,7 @@ const profileSchema = yup.object({
 export function Profile() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
-  const [userPhoto, setUserPhoto] = useState(githubUrl);
+  const [userPhoto, setUserPhoto] = useState(defaulUserPhotoImg);
 
   const { user, updateUserProfile } = useAuth();
   const toast = useToast();
@@ -102,7 +102,37 @@ export function Profile() {
           });
         }
 
-        setUserPhoto(photoSelected.uri);
+        const fileExtension = photoSelected.uri.split(".").pop();
+
+        const photoFile = {
+          name: `${user.name}.${fileExtension}`.toLowerCase(),
+          uri: photoSelected.uri,
+          type: `${photoSelected.type}/${fileExtension}`,
+        } as any;
+
+        const userPhotoUploadForm = new FormData();
+
+        userPhotoUploadForm.append("avatar", photoFile);
+
+        const updatedAvatarResponse = await api.patch(
+          "/users/avatar",
+          userPhotoUploadForm,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+
+        const updatedUser = user;
+
+        updatedUser.avatar = updatedAvatarResponse.data.avatar;
+
+        await updateUserProfile(updatedUser);
+
+        toast.show({
+          title: "Foto atualizada!",
+          placement: "top",
+          bgColor: "green.500",
+        });
       }
     } catch (error) {
       console.log(error);
@@ -157,7 +187,11 @@ export function Profile() {
             />
           ) : (
             <UserPhoto
-              source={{ uri: userPhoto }}
+              source={
+                user.avatar
+                  ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}` }
+                  : defaulUserPhotoImg
+              }
               alt="Foto do usuário"
               size={PHOTO_SIZE}
             />
